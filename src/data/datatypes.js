@@ -360,7 +360,7 @@ const mysqlTypesBase = {
       return intRegex.test(field.default);
     },
     hasCheck: true,
-    isSized: false,
+    isSized: true,
     hasPrecision: false,
     canIncrement: true,
     signed: true,
@@ -536,7 +536,7 @@ const mysqlTypesBase = {
       return Number.parseInt(d[0]) >= 1000 && Number.parseInt(d[0]) <= 9999;
     },
     hasCheck: false,
-    isSized: false,
+    isSized: true,
     hasPrecision: false,
     hasQuotes: true,
   },

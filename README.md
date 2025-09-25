@@ -59,6 +59,7 @@ npm run build
 ```bash
 docker build -t drawdb .
 docker run -p 3000:80 drawdb
+docker run -p 8280:80 --name drawdb -d --restart=always drawdb
 ```
 
 If you wish to work with sharing, set up [server](https://github.com/drawdb-io/drawdb-server) and environment variables according to `.env.sample`. This is not required unless you want to share files.

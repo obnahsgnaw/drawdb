@@ -30,6 +30,8 @@ export function fromMySQL(ast, diagramDb = DB.GENERIC) {
         const table = {};
         table.name = e.table[0].table;
         table.comment = "";
+        table.engine = "InnoDB";
+        table.charset = "utf8";
         table.color = "#175e7a";
         table.fields = [];
         table.indices = [];
@@ -55,7 +57,7 @@ export function fromMySQL(ast, diagramDb = DB.GENERIC) {
             field.increment = false;
             if (d.auto_increment) field.increment = true;
             field.notNull = false;
-            if (d.nullable) field.notNull = true;
+            if (d.nullable && d.nullable.type==="not null") field.notNull = true;
             field.primary = false;
             if (d.primary_key) field.primary = true;
             field.default = "";
@@ -158,6 +160,30 @@ export function fromMySQL(ast, diagramDb = DB.GENERIC) {
               }
 
               relationships.push(relationship);
+            }else if (d.constraint_type.toLowerCase() === "unique index" || d.constraint_type.toLowerCase() === "unique key") {
+              const idx = {
+                unique: true,
+                name: d.index,
+                fields: []
+              }
+              if (d.definition){
+                d.definition.forEach((c) => {
+                  idx.fields.push(c.column)
+                })
+              }
+              table.indices.push(idx)
+            }else if (d.constraint_type.toLowerCase() === "index" || d.constraint_type.toLowerCase() === "key") {
+              const idx = {
+                unique: false,
+                name: d.index,
+                fields: []
+              }
+              if (d.definition){
+                d.definition.forEach((c) => {
+                  idx.fields.push(c.column)
+                })
+              }
+              table.indices.push(idx)
             }
           }
         });
@@ -165,6 +191,10 @@ export function fromMySQL(ast, diagramDb = DB.GENERIC) {
         e.table_options?.forEach((opt) => {
           if (opt.keyword === "comment") {
             table.comment = opt.value.replace(/^["']|["']$/g, "");
+          }else if (opt.keyword === "engine") {
+            table.engine = opt.value;
+          }else if (opt.keyword === "default charset") {
+            table.charset = opt.value.value;
           }
         });
 

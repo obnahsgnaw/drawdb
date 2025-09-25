@@ -39,6 +39,7 @@ import { useTranslation } from "react-i18next";
 import { importSQL } from "../../../utils/importSQL";
 import { databases } from "../../../data/databases";
 import { isRtl } from "../../../i18n/utils/rtl";
+import {fa} from "../../../i18n/locales/fa.js";
 
 const extensionToLanguage = {
   md: "markdown",
@@ -171,11 +172,23 @@ export default function Modal({
       );
 
       if (importSource.overwrite) {
+        setTables((prev) => {
+          prev.forEach(t => {
+            diagramData.tables.map(tt => {
+              if (tt.name === t.name) {
+                tt.x = t.x
+                tt.y = t.y
+              }
+              return tt
+            })
+          })
+          return prev
+        });
         setTables(diagramData.tables);
         setRelationships(diagramData.relationships);
         setTransform((prev) => ({ ...prev, pan: { x: 0, y: 0 } }));
         setNotes([]);
-        setAreas([]);
+        //setAreas([]);
         if (databases[database].hasTypes) setTypes(diagramData.types ?? []);
         if (databases[database].hasEnums) setEnums(diagramData.enums ?? []);
         setUndoStack([]);

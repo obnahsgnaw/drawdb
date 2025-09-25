@@ -21,11 +21,11 @@ export function toMySQL(diagram) {
   return `${diagram.tables
     .map(
       (table) =>
-        `CREATE TABLE \`${table.name}\` (\n${table.fields
+        `CREATE TABLE \`${table.name}\` \n(\n${table.fields
           .map(
             (field) =>
               `\t\`${field.name}\` ${parseType(field)}${field.unsigned ? " UNSIGNED" : ""}${
-                field.notNull ? " NOT NULL" : ""
+                field.notNull ? " NOT NULL" : " NULL"
               }${
                 field.increment ? " AUTO_INCREMENT" : ""
               }${field.unique ? " UNIQUE" : ""}${
@@ -39,25 +39,23 @@ export function toMySQL(diagram) {
                   : ` CHECK(${field.check})`
               }${field.comment ? ` COMMENT '${escapeQuotes(field.comment)}'` : ""}`,
           )
-          .join(",\n")}${
+          .join(",\n")}${table.indices
+            .map(
+              (i) =>
+                `,\n\t${i.unique ? "UNIQUE " : ""}INDEX \`${ i.name }\` (${i.fields
+                  .map((f) => `\`${f}\``)
+                  .join(", ")})`,
+            )
+            .join("")}${
           table.fields.filter((f) => f.primary).length > 0
             ? `,\n\tPRIMARY KEY(${table.fields
                 .filter((f) => f.primary)
                 .map((f) => `\`${f.name}\``)
                 .join(", ")})`
             : ""
-        }\n)${table.comment ? ` COMMENT='${escapeQuotes(table.comment)}'` : ""};\n${`\n${table.indices
-          .map(
-            (i) =>
-              `\nCREATE ${i.unique ? "UNIQUE " : ""}INDEX \`${
-                i.name
-              }\`\nON \`${table.name}\` (${i.fields
-                .map((f) => `\`${f}\``)
-                .join(", ")});`,
-          )
-          .join("")}`}`,
+        }\n)${table.engine ? ` ENGINE = ${escapeQuotes(table.engine)}` : `ENGINE = InnoDB`} \n${table.charset ? `  DEFAULT CHARSET = ${escapeQuotes(table.charset)}` : `  DEFAULT CHARSET = utf8`} ${table.comment ? ` COMMENT='${escapeQuotes(table.comment)}'` : ""};\n`,
     )
-    .join("\n")}\n${diagram.references
+    .join("\n")}\n${diagram.references?`# 外键关系按实际需要来执行，用于构建图关系\n`:``}${diagram.references
     .map((r) => {
       const { name: startName, fields: startFields } = diagram.tables.find(
         (t) => t.id === r.startTableId,
