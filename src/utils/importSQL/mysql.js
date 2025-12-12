@@ -172,19 +172,19 @@ export function fromMySQL(ast, diagramDb = DB.GENERIC) {
                 })
               }
               table.indices.push(idx)
-            }else if (d.constraint_type.toLowerCase() === "index" || d.constraint_type.toLowerCase() === "key") {
-              const idx = {
-                unique: false,
-                name: d.index,
-                fields: []
-              }
-              if (d.definition){
-                d.definition.forEach((c) => {
-                  idx.fields.push(c.column)
-                })
-              }
-              table.indices.push(idx)
             }
+          }else if (d.resource.toLowerCase() === "index" || d.resource.toLowerCase() === "key") {
+            const idx = {
+              unique: false,
+              name: d.index,
+              fields: []
+            }
+            if (d.definition){
+              d.definition.forEach((c) => {
+                idx.fields.push(c.column)
+              })
+            }
+            table.indices.push(idx)
           }
         });
 

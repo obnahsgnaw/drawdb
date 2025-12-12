@@ -178,6 +178,7 @@ export default function Modal({
               if (tt.name === t.name) {
                 tt.x = t.x
                 tt.y = t.y
+                tt.locked = t.locked
               }
               return tt
             })
